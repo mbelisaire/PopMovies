@@ -13,4 +13,5 @@
         android:contentDescription="@string/image_description"
         android:scaleType="centerCrop"
         app:srcCompat="@android:mipmap/sym_def_app_icon" />
+
 </RelativeLayout>

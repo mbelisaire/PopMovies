@@ -1,6 +1,7 @@
 package com.mbelisaire.popmovies;
 
 import android.content.Context;
+import android.content.Intent;
 import android.media.Image;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -19,8 +20,8 @@ import org.json.JSONObject;
 
 public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MoviesHolder>{
 
-    private static final String JSON_MOVIE_IMAGE_PATH_KEY = "poster_path";
-    private static final String JSON_MOVIE_IMAGE_URL_KEY = "https://image.tmdb.org/t/p/w500";
+    private static final String JSON_MOVIE_POSTER_PATH_KEY = "poster_path";
+
 
     private Context ctx;
     private JSONArray movies;
@@ -38,15 +39,21 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MoviesHold
     }
 
     @Override
-    public void onBindViewHolder(MoviesAdapter.MoviesHolder holder, int position) {
-        JSONObject movie = movies.optJSONObject(position);
-        String imagePath = movie.optString(JSON_MOVIE_IMAGE_PATH_KEY);
-        String imageUrl = JSON_MOVIE_IMAGE_URL_KEY.concat(imagePath);
+    public void onBindViewHolder(MoviesAdapter.MoviesHolder holder, final int position) {
+        JSONObject movieJson = movies.optJSONObject(position);
+        String posterPath = movieJson.optString(JSON_MOVIE_POSTER_PATH_KEY);
+        String posterUrl = MovieDetailActivity.JSON_MOVIE_IMAGE_URL_KEY.concat(posterPath);
         Picasso.get()
-                .load(imageUrl)
+                .load(posterUrl)
                 .placeholder(R.drawable.ic_launcher_background)
                 .error(R.drawable.ic_launcher_foreground)
                 .into(holder.movieImage);
+        holder.movieImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                launchMovieDetailActivity(position);
+            }
+        });
     }
 
     @Override
@@ -60,5 +67,11 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MoviesHold
             super(itemView);
             movieImage = itemView.findViewById(R.id.movieImage);
         }
+    }
+
+    private void launchMovieDetailActivity(int position) {
+        Intent intent = new Intent(ctx, MovieDetailActivity.class);
+        intent.putExtra(MovieDetailActivity.EXTRA_POSITION, position);
+        ctx.startActivity(intent);
     }
 }
