@@ -26,19 +26,19 @@ import org.json.JSONObject;
 public class MainActivity extends AppCompatActivity {
 
     private static final String JSON_MOVIES_RESULTS_KEY = "results";
-    public static JSONArray currentMovies;
+    public static final String EXTRA_MOVIES = "extra_movies";
 
-    RecyclerView moviesRecycler;
-    MoviesAdapter popAdapter, topAdapter;
-    JSONArray popularMovies, topMovies;
-    boolean isSortedByPopular = true;
+    private RecyclerView moviesRecycler;
+    private MoviesAdapter popAdapter, topAdapter;
+    private JSONArray popularMovies, topMovies;
+    private boolean isSortedByPopular = true;
 
 
     //Please, provide API Key from The Movie Database API
 
-    String API_KEY = "";
-    String popularMoviesUrl = "http://api.themoviedb.org/3/movie/popular?api_key=" + API_KEY;
-    String topMoviesUrl = "http://api.themoviedb.org/3/movie/top_rated?api_key=" + API_KEY;
+    private String API_KEY = "";
+    private String popularMoviesUrl = "http://api.themoviedb.org/3/movie/popular?api_key=" + API_KEY;
+    private String topMoviesUrl = "http://api.themoviedb.org/3/movie/top_rated?api_key=" + API_KEY;
 
     JsonObjectRequest popularMoviesJsonObjectRequest = new JsonObjectRequest(Request.Method.GET, popularMoviesUrl, null, new Response.Listener<JSONObject>() {
         @Override
@@ -46,13 +46,12 @@ public class MainActivity extends AppCompatActivity {
                 popularMovies = response.optJSONArray(JSON_MOVIES_RESULTS_KEY);
                 popAdapter = new MoviesAdapter(getApplicationContext(), popularMovies);
                 moviesRecycler.setAdapter(popAdapter);
-                currentMovies = popularMovies;
                 moviesRecycler.setLayoutManager(new GridLayoutManager(getApplicationContext(), 2));
         }
     }, new Response.ErrorListener() {
         @Override
         public void onErrorResponse(VolleyError error) {
-            Log.e("Volley", error.getMessage());
+            Log.e("Volley", "Failed to fetch data. " + error.getMessage());
         }
     });
     JsonObjectRequest topMoviesJsonObjectRequest = new JsonObjectRequest(Request.Method.GET, topMoviesUrl, null, new Response.Listener<JSONObject>() {
@@ -64,7 +63,7 @@ public class MainActivity extends AppCompatActivity {
     }, new Response.ErrorListener() {
         @Override
         public void onErrorResponse(VolleyError error) {
-            Log.e("Volley", error.getMessage());
+            Log.e("Volley", "Failed to fetch data. " +  error.getMessage());
         }
     });
 
@@ -93,13 +92,10 @@ public class MainActivity extends AppCompatActivity {
             isSortedByPopular = !isSortedByPopular;
             MoviesAdapter adapter = isSortedByPopular ? popAdapter : topAdapter;
             moviesRecycler.setAdapter(adapter);
-            currentMovies = isSortedByPopular ? popularMovies : topMovies;
             return true;
         }
         else {
             return super.onOptionsItemSelected(item);
         }
     }
-
-
 }

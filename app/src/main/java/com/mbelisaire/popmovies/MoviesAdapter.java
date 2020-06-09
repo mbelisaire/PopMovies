@@ -39,7 +39,7 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MoviesHold
     }
 
     @Override
-    public void onBindViewHolder(MoviesAdapter.MoviesHolder holder, final int position) {
+    public void onBindViewHolder(final MoviesAdapter.MoviesHolder holder, int position) {
         JSONObject movieJson = movies.optJSONObject(position);
         String posterPath = movieJson.optString(JSON_MOVIE_POSTER_PATH_KEY);
         String posterUrl = MovieDetailActivity.JSON_MOVIE_IMAGE_URL_KEY.concat(posterPath);
@@ -51,7 +51,7 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MoviesHold
         holder.movieImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                launchMovieDetailActivity(position);
+                launchMovieDetailActivity(holder.getAdapterPosition());
             }
         });
     }
@@ -72,6 +72,7 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MoviesHold
     private void launchMovieDetailActivity(int position) {
         Intent intent = new Intent(ctx, MovieDetailActivity.class);
         intent.putExtra(MovieDetailActivity.EXTRA_POSITION, position);
+        intent.putExtra(MainActivity.EXTRA_MOVIES, movies.toString());
         ctx.startActivity(intent);
     }
 }

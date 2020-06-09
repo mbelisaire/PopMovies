@@ -3,7 +3,7 @@ package com.mbelisaire.popmovies;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class Movie {
+final public class Movie {
 
     private String posterUrl;
     private String title;

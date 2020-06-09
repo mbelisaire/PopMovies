@@ -1,15 +1,18 @@
 package com.mbelisaire.popmovies;
 
 import android.content.Intent;
+import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.mbelisaire.popmovies.databinding.DetailActivityBinding;
 import com.squareup.picasso.Picasso;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.w3c.dom.Text;
 
@@ -31,11 +34,12 @@ public class MovieDetailActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.detail_activity);
+        DetailActivityBinding binding = DataBindingUtil.setContentView(this, R.layout.detail_activity);
 
         Intent intent = getIntent();
         if(intent == null) {
             closeOnError();
+            return;
         }
 
         int position = intent.getIntExtra(EXTRA_POSITION, DEFAULT_POSITION);
@@ -44,7 +48,20 @@ public class MovieDetailActivity extends AppCompatActivity {
             return;
         }
 
-        JSONArray movies = MainActivity.currentMovies;
+        String moviesJSONString = intent.getStringExtra(MainActivity.EXTRA_MOVIES);
+        if(moviesJSONString == null){
+            closeOnError();
+            return;
+        }
+
+        JSONArray movies;
+        try {
+            movies = new JSONArray(moviesJSONString);
+        } catch (JSONException e) {
+            e.printStackTrace();
+            closeOnError();
+            return;
+        }
 
         JSONObject movieJson = movies.optJSONObject(position);
         String posterPath = movieJson.optString(JSON_MOVIE_POSTER_PATH_KEY);
@@ -61,7 +78,7 @@ public class MovieDetailActivity extends AppCompatActivity {
             e.printStackTrace();
         }
         Movie movie = new Movie(posterUrl, title, releaseDate , vote, plot);
-        populateUI(movie);
+        populateUI(movie, binding);
     }
 
     private void closeOnError() {
@@ -69,15 +86,11 @@ public class MovieDetailActivity extends AppCompatActivity {
         Toast.makeText(this, R.string.detail_error_message, Toast.LENGTH_SHORT).show();
     }
 
-    private void populateUI(Movie movie){
-        TextView titleTV = findViewById(R.id.movieTitle);
-        titleTV.setText(movie.getTitle());
-        TextView releaseDateTV = findViewById(R.id.movieReleaseDate);
-        releaseDateTV.setText(movie.getReleaseYear());
-        TextView voteTV = findViewById(R.id.movieVoteAverage);
-        voteTV.setText(Double.toString(movie.getVoteAverage()).concat("/10"));
-        TextView plotTV = findViewById(R.id.moviePlot);
-        plotTV.setText(movie.getPlot());
+    private void populateUI(Movie movie, DetailActivityBinding binding){
+        binding.movieTitle.setText(movie.getTitle());
+        binding.movieReleaseDate.setText(movie.getReleaseYear());
+        binding.movieVoteAverage.setText(Double.toString(movie.getVoteAverage()).concat("/10"));
+        binding.moviePlot.setText(movie.getPlot());
         ImageView posterView = findViewById(R.id.moviePoster);
         Picasso.get()
                 .load(movie.getPosterUrl())
