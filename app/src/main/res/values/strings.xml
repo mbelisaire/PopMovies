@@ -3,6 +3,8 @@
     <string name="image_description">Popular Movie Image</string>
     <string name="sorting_mode">Sort by Rates</string>
 
+    <string name="movie_video_image_description">Play Movie Video</string>
+
     <!-- Error messages-->
     <string name="detail_error_message">Movie details unavailable</string>
 </resources>

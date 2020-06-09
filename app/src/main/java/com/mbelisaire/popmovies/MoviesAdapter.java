@@ -42,7 +42,7 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MoviesHold
     public void onBindViewHolder(final MoviesAdapter.MoviesHolder holder, int position) {
         JSONObject movieJson = movies.optJSONObject(position);
         String posterPath = movieJson.optString(JSON_MOVIE_POSTER_PATH_KEY);
-        String posterUrl = MovieDetailActivity.JSON_MOVIE_IMAGE_URL_KEY.concat(posterPath);
+        String posterUrl = Constants.JSON_MOVIE_IMAGE_URL_KEY.concat(posterPath);
         Picasso.get()
                 .load(posterUrl)
                 .placeholder(R.drawable.ic_launcher_background)
@@ -71,8 +71,8 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MoviesHold
 
     private void launchMovieDetailActivity(int position) {
         Intent intent = new Intent(ctx, MovieDetailActivity.class);
-        intent.putExtra(MovieDetailActivity.EXTRA_POSITION, position);
-        intent.putExtra(MainActivity.EXTRA_MOVIES, movies.toString());
+        intent.putExtra(Constants.EXTRA_POSITION, position);
+        intent.putExtra(Constants.EXTRA_MOVIES, movies.toString());
         ctx.startActivity(intent);
     }
 }

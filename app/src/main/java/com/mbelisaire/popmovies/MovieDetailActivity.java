@@ -4,10 +4,20 @@ import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
 import com.mbelisaire.popmovies.databinding.DetailActivityBinding;
 import com.squareup.picasso.Picasso;
 
@@ -22,14 +32,16 @@ import java.util.Date;
 
 public class MovieDetailActivity extends AppCompatActivity {
 
-    public static final String EXTRA_POSITION = "extra_position";
-    private static final  int DEFAULT_POSITION = -1;
-    private static final String JSON_MOVIE_POSTER_PATH_KEY = "poster_path";
-    private static final String JSON_MOVIE_TITLE_KEY = "title";
-    private static final String JSON_MOVIE_RELEASE_KEY = "release_date";
-    private static final String JSON_MOVIE_VOTE_KEY = "vote_average";
-    private static final String JSON_MOVIE_PLOT_KEY = "overview";
-    public static final String JSON_MOVIE_IMAGE_URL_KEY = "https://image.tmdb.org/t/p/w500";
+
+
+    private String baseUrl = "http://api.themoviedb.org/3/movie/";
+    private String movieVideosUrl = "/videos?api_key=" + Constants.API_KEY;
+    private String movieId = "";
+    private JSONArray movieVideos;
+    private MovieVideosAdapter movieVideosAdapter;
+    private RecyclerView movieVideosRecycler;
+
+    JsonObjectRequest movieVideosJsonObjectRequest;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,13 +54,13 @@ public class MovieDetailActivity extends AppCompatActivity {
             return;
         }
 
-        int position = intent.getIntExtra(EXTRA_POSITION, DEFAULT_POSITION);
-        if(position == DEFAULT_POSITION){
+        int position = intent.getIntExtra(Constants.EXTRA_POSITION, Constants.DEFAULT_POSITION);
+        if(position == Constants.DEFAULT_POSITION){
             closeOnError();
             return;
         }
 
-        String moviesJSONString = intent.getStringExtra(MainActivity.EXTRA_MOVIES);
+        String moviesJSONString = intent.getStringExtra(Constants.EXTRA_MOVIES);
         if(moviesJSONString == null){
             closeOnError();
             return;
@@ -64,12 +76,14 @@ public class MovieDetailActivity extends AppCompatActivity {
         }
 
         JSONObject movieJson = movies.optJSONObject(position);
-        String posterPath = movieJson.optString(JSON_MOVIE_POSTER_PATH_KEY);
-        String posterUrl = JSON_MOVIE_IMAGE_URL_KEY.concat(posterPath);
-        String title = movieJson.optString(JSON_MOVIE_TITLE_KEY);
-        String release = movieJson.optString(JSON_MOVIE_RELEASE_KEY);
-        Double vote = movieJson.optDouble(JSON_MOVIE_VOTE_KEY);
-        String plot = movieJson.optString(JSON_MOVIE_PLOT_KEY);
+        Double id = movieJson.optDouble(Constants.JSON_MOVIE_ID_KEY);
+        movieId = id.toString();
+        String posterPath = movieJson.optString(Constants.JSON_MOVIE_POSTER_PATH_KEY);
+        String posterUrl = Constants.JSON_MOVIE_IMAGE_URL_KEY.concat(posterPath);
+        String title = movieJson.optString(Constants.JSON_MOVIE_TITLE_KEY);
+        String release = movieJson.optString(Constants.JSON_MOVIE_RELEASE_KEY);
+        Double vote = movieJson.optDouble(Constants.JSON_MOVIE_VOTE_KEY);
+        String plot = movieJson.optString(Constants.JSON_MOVIE_PLOT_KEY);
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         Date releaseDate = null;
         try {
@@ -77,7 +91,17 @@ public class MovieDetailActivity extends AppCompatActivity {
         } catch (ParseException e) {
             e.printStackTrace();
         }
-        Movie movie = new Movie(posterUrl, title, releaseDate , vote, plot);
+
+        buildMovieVideosJsonObjectRequest();
+
+        movieVideosRecycler = findViewById(R.id.movieVideosRecycler);
+
+        RequestQueue queue = Volley.newRequestQueue(this);
+
+        queue.add(movieVideosJsonObjectRequest);
+
+
+        Movie movie = new Movie(id, posterUrl, title, releaseDate , vote, plot);
         populateUI(movie, binding);
     }
 
@@ -97,5 +121,22 @@ public class MovieDetailActivity extends AppCompatActivity {
                 .placeholder(R.drawable.ic_launcher_background)
                 .error(R.drawable.ic_launcher_foreground)
                 .into(posterView);
+    }
+
+    private void buildMovieVideosJsonObjectRequest() {
+        movieVideosJsonObjectRequest = new JsonObjectRequest(Request.Method.GET, baseUrl + movieId + movieVideosUrl, null, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+                movieVideos = response.optJSONArray(Constants.JSON_MOVIE_VIDEOS_RESULTS_KEY);
+                movieVideosAdapter = new MovieVideosAdapter(getApplicationContext(), movieVideos);
+                movieVideosRecycler.setAdapter(movieVideosAdapter);
+                movieVideosRecycler.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.e("Volley", "Failed to fetch movie videos data. " + error.getMessage());
+            }
+        });
     }
 }

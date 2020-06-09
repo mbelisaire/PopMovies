@@ -25,25 +25,18 @@ import org.json.JSONObject;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final String JSON_MOVIES_RESULTS_KEY = "results";
-    public static final String EXTRA_MOVIES = "extra_movies";
-
     private RecyclerView moviesRecycler;
     private MoviesAdapter popAdapter, topAdapter;
     private JSONArray popularMovies, topMovies;
     private boolean isSortedByPopular = true;
 
-
-    //Please, provide API Key from The Movie Database API
-
-    private String API_KEY = "";
-    private String popularMoviesUrl = "http://api.themoviedb.org/3/movie/popular?api_key=" + API_KEY;
-    private String topMoviesUrl = "http://api.themoviedb.org/3/movie/top_rated?api_key=" + API_KEY;
+    private String popularMoviesUrl = "http://api.themoviedb.org/3/movie/popular?api_key=" + Constants.API_KEY;
+    private String topMoviesUrl = "http://api.themoviedb.org/3/movie/top_rated?api_key=" + Constants.API_KEY;
 
     JsonObjectRequest popularMoviesJsonObjectRequest = new JsonObjectRequest(Request.Method.GET, popularMoviesUrl, null, new Response.Listener<JSONObject>() {
         @Override
         public void onResponse(JSONObject response) {
-                popularMovies = response.optJSONArray(JSON_MOVIES_RESULTS_KEY);
+                popularMovies = response.optJSONArray(Constants.JSON_MOVIES_RESULTS_KEY);
                 popAdapter = new MoviesAdapter(getApplicationContext(), popularMovies);
                 moviesRecycler.setAdapter(popAdapter);
                 moviesRecycler.setLayoutManager(new GridLayoutManager(getApplicationContext(), 2));
@@ -57,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
     JsonObjectRequest topMoviesJsonObjectRequest = new JsonObjectRequest(Request.Method.GET, topMoviesUrl, null, new Response.Listener<JSONObject>() {
         @Override
         public void onResponse(JSONObject response) {
-            topMovies = response.optJSONArray(JSON_MOVIES_RESULTS_KEY);
+            topMovies = response.optJSONArray(Constants.JSON_MOVIES_RESULTS_KEY);
             topAdapter = new MoviesAdapter(getApplicationContext(), topMovies);
         }
     }, new Response.ErrorListener() {
