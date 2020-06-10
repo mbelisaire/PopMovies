@@ -23,8 +23,8 @@
                     android:layout_weight="0.2"
                     android:background="#448AFF"
                     android:gravity="center_vertical"
-                    android:paddingLeft="10dp"
-                    android:paddingRight="10dp"
+                    android:paddingLeft="16dp"
+                    android:paddingRight="16dp"
                     android:textAppearance="@style/TextAppearance.AppCompat.Large"
                     android:textColor="@android:color/white"
                     android:textSize="38sp" />
@@ -39,16 +39,16 @@
                         android:id="@+id/moviePoster"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginLeft="10dp"
-                        android:layout_marginRight="10dp"
-                        android:layout_marginTop="10dp"
+                        android:layout_marginLeft="16dp"
+                        android:layout_marginRight="16dp"
+                        android:layout_marginTop="16dp"
                         android:contentDescription="@string/image_description"
                         app:srcCompat="@android:mipmap/sym_def_app_icon" />
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:layout_margin="10dp"
+                        android:layout_margin="16dp"
                         android:orientation="vertical">
 
                         <TextView
@@ -70,18 +70,73 @@
                     android:id="@+id/moviePlot"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="10dp"
-                    android:layout_marginLeft="10dp"
-                    android:layout_marginRight="10dp"
-                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="16dp"
+                    android:layout_marginLeft="16dp"
+                    android:layout_marginRight="16dp"
+                    android:layout_marginTop="16dp"
                     android:layout_weight="0.4" />
+
+                <View style="@style/SectionDivider"
+                    android:layout_margin="16dp"/>
+
+                <TextView
+                    android:id="@+id/movieTrailerSectionLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="18sp"
+                    android:text="@string/movie_trailer_section_label"
+                    android:layout_marginLeft="16dp"
+                    android:textColor="@color/colorPrimary"
+                    android:layout_marginStart="16dp" />
+
+                <TextView
+                    android:id="@+id/movieNoVideoLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="12sp"
+                    android:text="@string/movie_no_video_label"
+                    android:layout_marginLeft="16dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="16dp"
+                    android:visibility="gone"/>
 
                 <android.support.v7.widget.RecyclerView
                     android:id="@+id/movieVideosRecycler"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="10dp"
-                    android:layout_marginTop="10dp" />
+                    android:layout_marginBottom="16dp"
+                    android:layout_marginTop="16dp" />
+
+                <View style="@style/SectionDivider"
+                    android:layout_margin="16dp"/>
+
+                <TextView
+                    android:id="@+id/movieReviewSectionLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="18sp"
+                    android:text="@string/movie_review_section_label"
+                    android:layout_marginLeft="16dp"
+                    android:layout_marginStart="16dp"
+                    android:textColor="@color/colorPrimary"/>
+
+                <TextView
+                    android:id="@+id/movieNoReviewLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="12sp"
+                    android:text="@string/movie_no_review_label"
+                    android:layout_marginLeft="16dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="16dp"
+                    android:visibility="gone"/>
+
+                <android.support.v7.widget.RecyclerView
+                    android:id="@+id/movieReviewsRecycler"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    android:layout_marginTop="16dp" />
             </LinearLayout>
         </ScrollView>
 

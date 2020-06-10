@@ -27,16 +27,15 @@ public class MainActivity extends AppCompatActivity {
 
     private RecyclerView moviesRecycler;
     private MoviesAdapter popAdapter, topAdapter;
-    private JSONArray popularMovies, topMovies;
     private boolean isSortedByPopular = true;
 
-    private String popularMoviesUrl = "http://api.themoviedb.org/3/movie/popular?api_key=" + Constants.API_KEY;
-    private String topMoviesUrl = "http://api.themoviedb.org/3/movie/top_rated?api_key=" + Constants.API_KEY;
+    private String popularMoviesUrl = Constants.POPULAR_MOVIES_URL + Config.API_KEY;
+    private String topMoviesUrl = Constants.TOP_RATED_MOVIES_URL + Config.API_KEY;
 
     JsonObjectRequest popularMoviesJsonObjectRequest = new JsonObjectRequest(Request.Method.GET, popularMoviesUrl, null, new Response.Listener<JSONObject>() {
         @Override
         public void onResponse(JSONObject response) {
-                popularMovies = response.optJSONArray(Constants.JSON_MOVIES_RESULTS_KEY);
+            JSONArray popularMovies = response.optJSONArray(Constants.JSON_MOVIES_RESULTS_KEY);
                 popAdapter = new MoviesAdapter(getApplicationContext(), popularMovies);
                 moviesRecycler.setAdapter(popAdapter);
                 moviesRecycler.setLayoutManager(new GridLayoutManager(getApplicationContext(), 2));
@@ -50,7 +49,7 @@ public class MainActivity extends AppCompatActivity {
     JsonObjectRequest topMoviesJsonObjectRequest = new JsonObjectRequest(Request.Method.GET, topMoviesUrl, null, new Response.Listener<JSONObject>() {
         @Override
         public void onResponse(JSONObject response) {
-            topMovies = response.optJSONArray(Constants.JSON_MOVIES_RESULTS_KEY);
+            JSONArray topMovies = response.optJSONArray(Constants.JSON_MOVIES_RESULTS_KEY);
             topAdapter = new MoviesAdapter(getApplicationContext(), topMovies);
         }
     }, new Response.ErrorListener() {

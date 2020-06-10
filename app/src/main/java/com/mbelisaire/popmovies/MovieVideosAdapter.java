@@ -5,14 +5,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
-import android.text.Layout;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-
-import com.squareup.picasso.Picasso;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -38,6 +35,9 @@ public class MovieVideosAdapter extends RecyclerView.Adapter<MovieVideosAdapter.
     public void onBindViewHolder(MovieVideosHolder holder, int position) {
         JSONObject movieVideoJson = movieVideos.optJSONObject(position);
         holder.textView.setText(movieVideoJson.optString(Constants.JSON_MOVIE_VIDEO_NAME));
+        if(position == movieVideos.length()-1){
+            holder.dividerView.setVisibility(View.GONE);
+        }
     }
 
     @Override
@@ -47,6 +47,7 @@ public class MovieVideosAdapter extends RecyclerView.Adapter<MovieVideosAdapter.
 
     public class MovieVideosHolder extends RecyclerView.ViewHolder {
         TextView textView;
+        View dividerView;
         public MovieVideosHolder(View itemView) {
             super(itemView);
             itemView.setOnClickListener(new View.OnClickListener() {
@@ -56,6 +57,7 @@ public class MovieVideosAdapter extends RecyclerView.Adapter<MovieVideosAdapter.
                 }
             });
             textView = itemView.findViewById(R.id.videoName);
+            dividerView = itemView.findViewById(R.id.videoDivider);
         }
     }
 

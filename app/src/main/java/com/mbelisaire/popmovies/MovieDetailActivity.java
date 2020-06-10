@@ -4,12 +4,11 @@ import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.View;
 import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.Request;
@@ -24,7 +23,6 @@ import com.squareup.picasso.Picasso;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.w3c.dom.Text;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -32,16 +30,15 @@ import java.util.Date;
 
 public class MovieDetailActivity extends AppCompatActivity {
 
-
-
-    private String baseUrl = "http://api.themoviedb.org/3/movie/";
-    private String movieVideosUrl = "/videos?api_key=" + Constants.API_KEY;
+    private String movieVideosUrl = Constants.MOVIE_GET_VIDEOS_URL + Config.API_KEY;
+    private String movieReviewsUrl = Constants.MOVIE_GET_REVIEWS_URL + Config.API_KEY;
     private String movieId = "";
-    private JSONArray movieVideos;
+    private JSONArray movieVideos, movieReviews;
     private MovieVideosAdapter movieVideosAdapter;
-    private RecyclerView movieVideosRecycler;
+    private MovieReviewsAdapter movieReviewsAdapter;
+    private RecyclerView movieVideosRecycler, movieReviewsRecycler;
 
-    JsonObjectRequest movieVideosJsonObjectRequest;
+    JsonObjectRequest movieVideosJsonObjectRequest, movieReviewsJsonObjectRequest;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -93,12 +90,15 @@ public class MovieDetailActivity extends AppCompatActivity {
         }
 
         buildMovieVideosJsonObjectRequest();
+        buildMovieReviewsJsonObjectRequest();
 
         movieVideosRecycler = findViewById(R.id.movieVideosRecycler);
+        movieReviewsRecycler = findViewById(R.id.movieReviewsRecycler);
 
         RequestQueue queue = Volley.newRequestQueue(this);
 
         queue.add(movieVideosJsonObjectRequest);
+        queue.add(movieReviewsJsonObjectRequest);
 
 
         Movie movie = new Movie(id, posterUrl, title, releaseDate , vote, plot);
@@ -124,18 +124,43 @@ public class MovieDetailActivity extends AppCompatActivity {
     }
 
     private void buildMovieVideosJsonObjectRequest() {
-        movieVideosJsonObjectRequest = new JsonObjectRequest(Request.Method.GET, baseUrl + movieId + movieVideosUrl, null, new Response.Listener<JSONObject>() {
+        movieVideosJsonObjectRequest = new JsonObjectRequest(Request.Method.GET, Constants.MOVIE_DATA_BASE_URL + movieId + movieVideosUrl, null, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
-                movieVideos = response.optJSONArray(Constants.JSON_MOVIE_VIDEOS_RESULTS_KEY);
+                movieVideos = response.optJSONArray(Constants.JSON_MOVIE_DATA_RESULTS_KEY);
                 movieVideosAdapter = new MovieVideosAdapter(getApplicationContext(), movieVideos);
+                if(movieVideosAdapter.getItemCount() < 1){
+                    findViewById(R.id.movieNoVideoLabel).setVisibility(View.VISIBLE);
+                }
                 movieVideosRecycler.setAdapter(movieVideosAdapter);
                 movieVideosRecycler.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
+                movieVideosRecycler.setNestedScrollingEnabled(false);
             }
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
                 Log.e("Volley", "Failed to fetch movie videos data. " + error.getMessage());
+            }
+        });
+    }
+
+    private void buildMovieReviewsJsonObjectRequest() {
+        movieReviewsJsonObjectRequest = new JsonObjectRequest(Request.Method.GET, Constants.MOVIE_DATA_BASE_URL + movieId + movieReviewsUrl, null, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+                movieReviews = response.optJSONArray(Constants.JSON_MOVIE_DATA_RESULTS_KEY);
+                movieReviewsAdapter = new MovieReviewsAdapter(getApplicationContext(), movieReviews);
+                if(movieReviewsAdapter.getItemCount() < 1){
+                    findViewById(R.id.movieNoReviewLabel).setVisibility(View.VISIBLE);
+                }
+                movieReviewsRecycler.setAdapter(movieReviewsAdapter);
+                movieReviewsRecycler.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
+                movieReviewsRecycler.setNestedScrollingEnabled(false);
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.e("Volley", "Failed to fetch movie reviews data. " + error.getMessage());
             }
         });
     }

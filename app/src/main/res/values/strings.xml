@@ -4,6 +4,10 @@
     <string name="sorting_mode">Sort by Rates</string>
 
     <string name="movie_video_image_description">Play Movie Video</string>
+    <string name="movie_trailer_section_label">Trailers:</string>
+    <string name="movie_review_section_label">Reviews:</string>
+    <string name="movie_no_video_label">No video available.</string>
+    <string name="movie_no_review_label">No review available.</string>
 
     <!-- Error messages-->
     <string name="detail_error_message">Movie details unavailable</string>
