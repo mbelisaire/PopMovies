@@ -1,20 +1,34 @@
 package com.mbelisaire.popmovies;
 
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-final public class Movie {
+import androidx.room.ColumnInfo;
+import androidx.room.Entity;
+import androidx.room.Ignore;
+import androidx.room.PrimaryKey;
 
-    private Double id;
+@Entity(tableName = "movie")
+final public class Movie implements Serializable {
+
+    @PrimaryKey(autoGenerate = true)
+    private int id;
+    @ColumnInfo(name = "movie_id")
+    private Long movieId;
+    @ColumnInfo(name = "poster_url")
     private String posterUrl;
     private String title;
+    @ColumnInfo(name = "release_date")
     private Date releaseDate;
+    @ColumnInfo(name = "vote_average")
     private double voteAverage;
     private String plot;
 
-    public Movie (Double id, String posterUrl, String title, Date releaseDate, Double voteAverage, String plot)
+    @Ignore
+    public Movie (Long movieId, String posterUrl, String title, Date releaseDate, Double voteAverage, String plot)
     {
-        this.id = id;
+        this.movieId = movieId;
         this.posterUrl = posterUrl;
         this.title = title;
         this.releaseDate = releaseDate;
@@ -22,8 +36,27 @@ final public class Movie {
         this.plot = plot;
     }
 
-    public Double getId() {
+    public Movie (int id, Long movieId, String posterUrl, String title, Date releaseDate, Double voteAverage, String plot)
+    {
+        this.id = id;
+        this.movieId = movieId;
+        this.posterUrl = posterUrl;
+        this.title = title;
+        this.releaseDate = releaseDate;
+        this.voteAverage = voteAverage;
+        this.plot = plot;
+    }
+
+    public int getId() {
         return id;
+    }
+
+    public Long getMovieId() {
+        return movieId;
+    }
+
+    public void setMovieId(Long movieId) {
+        this.movieId = movieId;
     }
 
     public String getPosterUrl() {
@@ -51,7 +84,7 @@ final public class Movie {
         return sdf.format(this.releaseDate);
     }
 
-    public void setId(Double id) {
+    public void setId(int id) {
         this.id = id;
     }
 

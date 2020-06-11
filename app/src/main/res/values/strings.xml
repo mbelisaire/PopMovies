@@ -1,9 +1,12 @@
 <resources>
     <string name="app_name">PopMovies</string>
     <string name="image_description">Popular Movie Image</string>
-    <string name="sorting_mode">Sort by Rates</string>
+    <string name="show_popular">Show Popular</string>
+    <string name="show_top_rated">Show Top Rated</string>
+    <string name="show_favorites">Show Favorites</string>
 
     <string name="movie_video_image_description">Play Movie Video</string>
+    <string name="movie_favorite_icon_description">Toggle Favorite</string>
     <string name="movie_trailer_section_label">Trailers:</string>
     <string name="movie_review_section_label">Reviews:</string>
     <string name="movie_no_video_label">No video available.</string>

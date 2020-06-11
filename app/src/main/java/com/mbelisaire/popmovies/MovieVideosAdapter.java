@@ -4,7 +4,7 @@ import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
-import android.support.v7.widget.RecyclerView;
+
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,6 +13,8 @@ import android.widget.TextView;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+
+import androidx.recyclerview.widget.RecyclerView;
 
 public class MovieVideosAdapter extends RecyclerView.Adapter<MovieVideosAdapter.MovieVideosHolder> {
 

@@ -1,11 +1,8 @@
 package com.mbelisaire.popmovies;
 
 import android.content.Intent;
-import android.databinding.DataBindingUtil;
+import android.graphics.Color;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
@@ -27,6 +24,13 @@ import org.json.JSONObject;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.databinding.DataBindingUtil;
+import androidx.lifecycle.Observer;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 public class MovieDetailActivity extends AppCompatActivity {
 
@@ -37,6 +41,9 @@ public class MovieDetailActivity extends AppCompatActivity {
     private MovieVideosAdapter movieVideosAdapter;
     private MovieReviewsAdapter movieReviewsAdapter;
     private RecyclerView movieVideosRecycler, movieReviewsRecycler;
+    private boolean isFavoriteMovie = false;
+    private Movie movie;
+    private AppDatabase mDb;
 
     JsonObjectRequest movieVideosJsonObjectRequest, movieReviewsJsonObjectRequest;
 
@@ -51,43 +58,13 @@ public class MovieDetailActivity extends AppCompatActivity {
             return;
         }
 
-        int position = intent.getIntExtra(Constants.EXTRA_POSITION, Constants.DEFAULT_POSITION);
-        if(position == Constants.DEFAULT_POSITION){
+        movie = (Movie) intent.getSerializableExtra(Constants.EXTRA_MOVIE);
+        if(movie == null){
             closeOnError();
             return;
         }
 
-        String moviesJSONString = intent.getStringExtra(Constants.EXTRA_MOVIES);
-        if(moviesJSONString == null){
-            closeOnError();
-            return;
-        }
-
-        JSONArray movies;
-        try {
-            movies = new JSONArray(moviesJSONString);
-        } catch (JSONException e) {
-            e.printStackTrace();
-            closeOnError();
-            return;
-        }
-
-        JSONObject movieJson = movies.optJSONObject(position);
-        Double id = movieJson.optDouble(Constants.JSON_MOVIE_ID_KEY);
-        movieId = id.toString();
-        String posterPath = movieJson.optString(Constants.JSON_MOVIE_POSTER_PATH_KEY);
-        String posterUrl = Constants.JSON_MOVIE_IMAGE_URL_KEY.concat(posterPath);
-        String title = movieJson.optString(Constants.JSON_MOVIE_TITLE_KEY);
-        String release = movieJson.optString(Constants.JSON_MOVIE_RELEASE_KEY);
-        Double vote = movieJson.optDouble(Constants.JSON_MOVIE_VOTE_KEY);
-        String plot = movieJson.optString(Constants.JSON_MOVIE_PLOT_KEY);
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        Date releaseDate = null;
-        try {
-            releaseDate = sdf.parse(release);
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
+        movieId = movie.getMovieId().toString();
 
         buildMovieVideosJsonObjectRequest();
         buildMovieReviewsJsonObjectRequest();
@@ -95,14 +72,15 @@ public class MovieDetailActivity extends AppCompatActivity {
         movieVideosRecycler = findViewById(R.id.movieVideosRecycler);
         movieReviewsRecycler = findViewById(R.id.movieReviewsRecycler);
 
+        mDb = AppDatabase.getInstance(getApplicationContext());
+
+
         RequestQueue queue = Volley.newRequestQueue(this);
 
         queue.add(movieVideosJsonObjectRequest);
         queue.add(movieReviewsJsonObjectRequest);
 
-
-        Movie movie = new Movie(id, posterUrl, title, releaseDate , vote, plot);
-        populateUI(movie, binding);
+        populateUI(binding);
     }
 
     private void closeOnError() {
@@ -110,7 +88,7 @@ public class MovieDetailActivity extends AppCompatActivity {
         Toast.makeText(this, R.string.detail_error_message, Toast.LENGTH_SHORT).show();
     }
 
-    private void populateUI(Movie movie, DetailActivityBinding binding){
+    private void populateUI(DetailActivityBinding binding){
         binding.movieTitle.setText(movie.getTitle());
         binding.movieReleaseDate.setText(movie.getReleaseYear());
         binding.movieVoteAverage.setText(Double.toString(movie.getVoteAverage()).concat("/10"));
@@ -121,6 +99,33 @@ public class MovieDetailActivity extends AppCompatActivity {
                 .placeholder(R.drawable.ic_launcher_background)
                 .error(R.drawable.ic_launcher_foreground)
                 .into(posterView);
+
+        ImageView favoriteIcon = findViewById(R.id.toggleFavorite);
+        checkIfFavoriteMovie();
+
+        favoriteIcon.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(isFavoriteMovie){
+                    removeFavoriteMovie(v);
+                    disableFavoriteIcon();
+                }else {
+                    addFavoriteMovie(v);
+                    enableFavoriteIcon();
+                }
+                isFavoriteMovie = !isFavoriteMovie;
+            }
+        });
+    }
+
+    private void disableFavoriteIcon(){
+        ImageView favoriteIcon = findViewById(R.id.toggleFavorite);
+        favoriteIcon.setColorFilter(Color.parseColor("#8A8A8A"));
+    }
+
+    private void enableFavoriteIcon() {
+        ImageView favoriteIcon = findViewById(R.id.toggleFavorite);
+        favoriteIcon.clearColorFilter();
     }
 
     private void buildMovieVideosJsonObjectRequest() {
@@ -163,5 +168,58 @@ public class MovieDetailActivity extends AppCompatActivity {
                 Log.e("Volley", "Failed to fetch movie reviews data. " + error.getMessage());
             }
         });
+    }
+
+    private void addFavoriteMovie(View view) {
+        addFavoriteMovie(movie);
+    }
+
+    private void removeFavoriteMovie(final View view) {
+        removeFavoriteMovie(movie);
+    }
+
+    private void removeFavoriteMovie(final Movie movie) {
+        AppExecutors.getInstance().getDiskIO().execute(new Runnable() {
+            @Override
+            public void run() {
+                List<Movie> matchedFavoriteMovies = mDb.movieDao().findMovieWithMovieId(movie.getMovieId());
+                if(matchedFavoriteMovies.size() == 1) {
+                    mDb.movieDao().deleteFavoriteMovie(matchedFavoriteMovies.get(0));
+                }
+            }
+        });
+    }
+
+    private void addFavoriteMovie(final Movie movie) {
+        AppExecutors.getInstance().getDiskIO().execute(new Runnable() {
+            @Override
+            public void run() {
+                List<Movie> matchedFavoriteMovies = mDb.movieDao().findMovieWithMovieId(movie.getMovieId());
+                if(matchedFavoriteMovies.size() < 1) {
+                    mDb.movieDao().insertFavoriteMovie(movie);
+                }
+            }
+        });
+    }
+
+    public void checkIfFavoriteMovie() {
+        AppExecutors.getInstance().getDiskIO().execute(new Runnable() {
+            @Override
+            public void run() {
+                List<Movie> matchedFavoriteMovies = mDb.movieDao().findMovieWithMovieId(movie.getMovieId());
+                if(matchedFavoriteMovies.size() == 1) {
+                    isFavoriteMovie =  true;
+                } else {
+                    isFavoriteMovie = false;
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            disableFavoriteIcon();
+                        }
+                    });
+                }
+            }
+        });
+
     }
 }
